@@ -14,6 +14,7 @@ db.connect((err)=>{
         return;
     }
     console.log('connected to db' + db.threadId);
+    db.end();
 });
 
 module.exports = db;
