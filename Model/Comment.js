@@ -11,4 +11,6 @@ const Comment = db.define('Comment',{
     timestamp: true,
     createdAt: "created_at",
     updatedAt: "updated_at"
-})
+});
+
+module.exports = Comment;
