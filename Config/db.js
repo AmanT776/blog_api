@@ -9,6 +9,7 @@ try{
             dialect: 'mysql'
         }
     );
+    console.log(`database connected`);
     module.exports = db;
 }catch(error){
     console.log(error);
