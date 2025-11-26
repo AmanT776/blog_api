@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const db = require('./Config/db');
+
 const {User} = require('./Model/associations');
 
 require('dotenv').config();
@@ -18,4 +19,5 @@ const PORT = process.env.PORT || 5000;
         console.log(error);
     }
 })();
+
 
