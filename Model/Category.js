@@ -13,4 +13,8 @@ const Category = db.define(
   }
 );
 
+Category.hasMany(Post, {
+  foreignKey: "category_id",
+});
+
 module.exports = Category;
