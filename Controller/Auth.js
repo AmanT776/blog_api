@@ -1,4 +1,11 @@
 const bcrypt = require("bcrypt");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../Utils/generateTokens");
+
+//models
+const Role = require("../Model/Role");
 const User = require("../Model/User");
 
 exports.signup = async (req, res) => {
@@ -38,6 +45,56 @@ exports.signup = async (req, res) => {
         last_name: last_name,
         email: email,
       },
+    });
+  }
+};
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({
+    where: {
+      email: email,
+    },
+    include: [
+      {
+        model: Role,
+        attributes: ["role_name"],
+      },
+    ],
+  });
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  const match = await bcrypt.compare(password, user.password);
+  if (match) {
+    const payload = {
+      id: user.id,
+      email: user.email,
+    };
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+    res.status(200).json({
+      success: true,
+      message: "login successful",
+      data: [
+        {
+          id: user.id,
+          email: user.email,
+          role: user.Role.dataValues.role_name,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
+      ],
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: "incorrect password",
     });
   }
 };
