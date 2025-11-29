@@ -73,6 +73,7 @@ exports.login = async (req, res) => {
   if (match) {
     const payload = {
       id: user.id,
+      role: Role.dataValues.role_name,
       email: user.email,
     };
 
