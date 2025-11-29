@@ -1,15 +1,16 @@
 const express = require("express");
 const app = express();
 const db = require("./Config/db");
-const { signup } = require("./Controller/Auth");
-
+const { signup, login } = require("./Controller/Auth");
+const router = require("express").Router();
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-app.post("/users", signup);
+app.post("/api/v1/login", login);
+app.post("/api/v1/signup", signup);
 
 (async () => {
   try {
