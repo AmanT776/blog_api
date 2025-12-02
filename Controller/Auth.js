@@ -90,9 +90,8 @@ exports.login = async (req, res) => {
       role: user.Role.role_name,
       email: user.email,
     };
-    console.log(user);
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
     res.status(200).json({
       success: true,
       message: "login successful",
