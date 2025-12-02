@@ -31,19 +31,26 @@ exports.signup = async (req, res) => {
   });
 
   if (createUser) {
-    const { id } = await User.findOne({
+    const user = await User.findOne({
       where: {
         email: email,
       },
+      include: {
+        model: Role,
+        attributes: ["role_name"],
+      },
+      raw: true,
+      nest: true,
     });
     return res.status(200).json({
       success: true,
       message: "Account Successfully Created",
       data: {
-        id: id,
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.Role.role_name,
       },
     });
   }
@@ -58,9 +65,10 @@ exports.login = async (req, res) => {
     include: [
       {
         model: Role,
-        attributes: ["role_name"],
       },
     ],
+    raw: true,
+    nest: true,
   });
 
   if (!user) {
@@ -73,10 +81,10 @@ exports.login = async (req, res) => {
   if (match) {
     const payload = {
       id: user.id,
-      role: Role.dataValues.role_name,
+      role: user.Role.role_name,
       email: user.email,
     };
-
+    console.log(user);
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
     res.status(200).json({
@@ -86,7 +94,7 @@ exports.login = async (req, res) => {
         {
           id: user.id,
           email: user.email,
-          role: user.Role.dataValues.role_name,
+          role: user.Role.role_name,
           accessToken: accessToken,
           refreshToken: refreshToken,
         },
