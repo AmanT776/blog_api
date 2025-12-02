@@ -4,7 +4,6 @@ const {
   generateRefreshToken,
 } = require("../Utils/generateTokens");
 
-//models
 const Role = require("../Model/Role");
 const User = require("../Model/User");
 

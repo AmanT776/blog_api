@@ -38,3 +38,35 @@ exports.createUser = async (req, res) => {
     return res.status(500).json(err);
   }
 };
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      include: {
+        model: Role,
+        attributes: ["role_name"],
+      },
+      attributes: {
+        exclude: ["role_id"],
+      },
+      raw: true,
+      nest: true,
+    });
+    const data = users.map((user, index) => {
+      const roleName = user.Role.role_name;
+      const { Role, ...userWithoutRole } = user;
+
+      return {
+        ...userWithoutRole,
+        role: roleName,
+      };
+    });
+    return res.status(200).json({
+      success: true,
+      message: "users retrieved successfully",
+      data: data,
+    });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+};
