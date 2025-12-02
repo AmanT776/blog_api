@@ -10,6 +10,12 @@ const User = require("../Model/User");
 
 exports.signup = async (req, res) => {
   const { first_name, last_name, email, password, role_id } = req.body;
+  if (!first_name || !last_name || !email || !role_id) {
+    return res.status(400).json({
+      success: false,
+      message: "all fields are required",
+    });
+  }
   const user = await User.findOne({
     where: {
       email: email,
