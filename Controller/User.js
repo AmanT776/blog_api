@@ -73,12 +73,6 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   const { id } = req.params;
-  if (!Number.isInteger(id)) {
-    res.status(400).json({
-      success: false,
-      message: "id must be integer",
-    });
-  }
   const user = await User.findOne({
     where: {
       id: id,
@@ -95,4 +89,45 @@ exports.getUserById = async (req, res) => {
     message: "user retrieved successfully",
     data: user,
   });
+};
+
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "user id required",
+    });
+  }
+  const user = await User.findOne({
+    where: {
+      id: id,
+    },
+  });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  try {
+    await User.update(req.body, {
+      where: {
+        id: id,
+      },
+    });
+    const updatedUser = await User.findOne({
+      where: {
+        id: id,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (err) {
+    return res.json(err);
+  }
 };
