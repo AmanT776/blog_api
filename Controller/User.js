@@ -22,20 +22,37 @@ exports.createUser = async (req, res) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const newUser = await User.create({
+    const createdUser = await User.create({
       first_name: first_name,
       last_name: last_name,
       email: email,
       password: hashedPassword,
       role_id: role_id,
     });
+    const newUser = await User.findByPk(createdUser.id, {
+      attributes: {
+        exclude: ["password"],
+      },
+      include: {
+        model: Role,
+        attributes: ["role_name"],
+      },
+      raw: true,
+      nest: true,
+    });
+    const { Role: userRole, ...newUserWithoutRole } = newUser;
     return res.status(200).json({
       success: true,
       message: "User created successfully",
-      data: newUser,
+      data: {
+        ...newUserWithoutRole,
+        role: userRole?.role_name,
+      },
     });
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
