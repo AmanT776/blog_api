@@ -1,31 +1,38 @@
 const Post = require("../Model/Post");
-
+const uploadToCloudinary = require("../Utils/uploadToCloudinary");
 exports.createPost = async (req, res) => {
-  const { title, content, likes } = req.body;
+  const image = req.file;
+  const imagePath = image.path;
+  const { title, content } = req.body;
   if (!title && !content) {
     return res.status(400).json({
       success: false,
-      message: "At least title or content is required ",
+      message: "at least one field required",
     });
   }
   try {
-    const post = await Post.create(
-      {
-        title: title || null,
-        content: content || null,
-        likes: 0,
-      },
-      { returning: true }
-    );
-    return res.status(200).json({
-      success: true,
-      message: "Post created successfully",
-      data: post,
-    });
+    const img = await uploadToCloudinary(imagePath);
+    console.log(img);
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({
-      message: "Internal server error occured while creating your post",
+      success: false,
+      message: "Internal server error while creating post",
     });
   }
+};
+
+exports.getAllPosts = async (req, res) => {
+  const posts = await Post.findAll();
+  if (!posts) {
+    return res.status(404).json({
+      success: false,
+      message: "no post found",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "posts retrieved successfully",
+    data: posts,
+  });
 };
