@@ -102,3 +102,34 @@ exports.getPostById = async (req, res) => {
     });
   }
 };
+
+exports.updatePost = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await Post.findByPk(id);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    await Post.update(req.body, {
+      where: {
+        id: id,
+      },
+      include: { model: Image, attributes: ["img_url"] },
+    });
+    const updatedPost = await Post.findByPk(id);
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully",
+      data: updatedPost,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error occured while updating the post",
+    });
+  }
+};
