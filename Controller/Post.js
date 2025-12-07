@@ -1,6 +1,7 @@
 const Post = require("../Model/Post");
 const uploadToCloudinary = require("../Utils/uploadToCloudinary");
 const Image = require("../Model/Images");
+const User = require("../Model/User");
 const upload = require("../Config/multer");
 exports.createPost = async (req, res) => {
   const images = req.files;
@@ -60,7 +61,9 @@ exports.createPost = async (req, res) => {
 };
 
 exports.getAllPosts = async (req, res) => {
-  const posts = await Post.findAll();
+  const posts = await Post.findAll({
+    include: { model: Image, attributes: ["img_url"] },
+  });
   if (!posts) {
     return res.status(404).json({
       success: false,
