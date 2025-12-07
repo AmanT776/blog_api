@@ -76,3 +76,29 @@ exports.getAllPosts = async (req, res) => {
     data: posts,
   });
 };
+
+exports.getPostById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await Post.findByPk(id, {
+      include: { model: Image, attributes: ["img_url"] },
+    });
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "post retrieved successfully",
+      data: post,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error occured while fetching the post",
+    });
+  }
+};
