@@ -3,6 +3,7 @@ const {
   getAllPosts,
   getPostById,
   updatePost,
+  deletePost,
 } = require("../Controller/Post");
 const express = require("express");
 const router = express.Router();
@@ -13,5 +14,6 @@ router.post("/", upload.array("images"), authorize(["author"]), createPost);
 router.get("/", getAllPosts);
 router.get("/:id", getPostById);
 router.put("/:id", updatePost);
+router.delete("/:id", deletePost);
 
 module.exports = router;

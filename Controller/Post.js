@@ -133,3 +133,27 @@ exports.updatePost = async (req, res) => {
     });
   }
 };
+
+exports.deletePost = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await Post.findByPk(id);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    const deletedPost = await post.destroy();
+    return res.status(200).json({
+      success: true,
+      message: "Post deleted successfully",
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error occured while deleting the post",
+    });
+  }
+};
