@@ -180,7 +180,6 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User deleted successfuly",
-      data: deletedUser,
     });
   } catch (err) {
     console.error(err);
