@@ -100,3 +100,21 @@ exports.updateRole = async (req, res) => {
     });
   }
 };
+
+exports.deleteRole = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const role = await Role.findByPk(id);
+    const deletedRole = await role.destroy();
+    return res.status(200).json({
+      success: true,
+      message: "role deleted successfully",
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while deleting role",
+    });
+  }
+};
