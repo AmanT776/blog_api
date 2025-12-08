@@ -70,3 +70,33 @@ exports.getRoleById = async (req, res) => {
     });
   }
 };
+
+exports.updateRole = async (req, res) => {
+  const { id } = req.params;
+  const { role_name } = req.body;
+  if (!role_name) {
+    return res.status(400).json({
+      success: false,
+      message: "role name required",
+    });
+  }
+  try {
+    const updatedRole = await Role.update(req.body, {
+      where: {
+        id: id,
+      },
+    });
+    const role = await Role.findByPk(id);
+    return res.status(200).json({
+      success: false,
+      message: "role updated succesffully",
+      data: role,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while updating role",
+    });
+  }
+};
