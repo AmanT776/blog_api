@@ -42,7 +42,31 @@ exports.getAllRoles = async (req, res) => {
     console.log(err.message);
     return res.status(500).json({
       success: false,
-      message: "Internal server error while fetching roles",
+      message: "Internal server error while retrieving roles",
+    });
+  }
+};
+
+exports.getRoleById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({
+        success: false,
+        message: "role not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "role retrieved successfully",
+      data: role,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while retrieving role",
     });
   }
 };
