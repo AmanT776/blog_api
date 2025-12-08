@@ -1,5 +1,4 @@
-const User = require("../Model/User");
-const Role = require("../Model/Role");
+const { User, Role } = require("../Model/associations");
 const bcrypt = require("bcrypt");
 exports.createUser = async (req, res) => {
   const { first_name, last_name, email, password, role_id } = req.body;
@@ -87,7 +86,7 @@ exports.getAllUsers = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "An internal server error occured while fetching users",
+      message: "An internal server error occured while retrieving users",
     });
     console.error(err);
   }

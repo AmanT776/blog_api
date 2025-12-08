@@ -1,11 +1,9 @@
-const Post = require("../Model/Post");
+const { Post, User, Images, Category } = require("../Model/associations");
 const uploadToCloudinary = require("../Utils/uploadToCloudinary");
-const Image = require("../Model/Images");
-const User = require("../Model/User");
 const upload = require("../Config/multer");
 exports.createPost = async (req, res) => {
-  const images = req.files;
-  const { title, content } = req.body;
+  const Imagess = req.files;
+  const { title, content, category_id } = req.body;
   const userId = req.user.id;
   if (!title && !content) {
     return res.status(400).json({
@@ -15,8 +13,8 @@ exports.createPost = async (req, res) => {
   }
   try {
     const urls = await Promise.all(
-      images.map((image) => {
-        return uploadToCloudinary(image.buffer);
+      Imagess.map((Images) => {
+        return uploadToCloudinary(Images.buffer);
       })
     );
     const createdPost = await Post.create({
@@ -24,10 +22,11 @@ exports.createPost = async (req, res) => {
       content: content,
       likes: 0,
       user_id: userId,
+      category_id: category_id,
     });
-    const createdImages = await Promise.all(
+    const createdImagess = await Promise.all(
       urls.map((url) => {
-        return Image.create({
+        return Images.create({
           img_url: url,
           post_id: createdPost.id,
         });
@@ -39,8 +38,12 @@ exports.createPost = async (req, res) => {
       },
       include: [
         {
-          model: Image,
+          model: Images,
           attributes: ["img_url"],
+        },
+        {
+          model: Category,
+          attributes: ["category_name"],
         },
       ],
       nest: true,
@@ -62,7 +65,7 @@ exports.createPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   const posts = await Post.findAll({
-    include: { model: Image, attributes: ["img_url"] },
+    include: { model: Images, attributes: ["img_url"] },
   });
   if (!posts) {
     return res.status(404).json({
@@ -81,7 +84,7 @@ exports.getPostById = async (req, res) => {
   const { id } = req.params;
   try {
     const post = await Post.findByPk(id, {
-      include: { model: Image, attributes: ["img_url"] },
+      include: { model: Images, attributes: ["img_url"] },
     });
     if (!post) {
       return res.status(404).json({
@@ -117,7 +120,7 @@ exports.updatePost = async (req, res) => {
       where: {
         id: id,
       },
-      include: { model: Image, attributes: ["img_url"] },
+      include: { model: Images, attributes: ["img_url"] },
     });
     const updatedPost = await Post.findByPk(id);
     res.status(200).json({

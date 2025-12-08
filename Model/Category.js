@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const db = require("../Config/db");
-
+const Post = require("./Post");
+const PostCategory = require("./PostCategory");
 const Category = db.define(
   "Category",
   {
@@ -12,9 +13,5 @@ const Category = db.define(
     updatedAt: "updated_at",
   }
 );
-
-Category.hasMany(Post, {
-  foreignKey: "category_id",
-});
 
 module.exports = Category;

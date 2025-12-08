@@ -1,4 +1,4 @@
-const Role = require("../Model/Role");
+const { Role } = require("../Model/associations");
 
 exports.createRole = async (req, res) => {
   const { role_name } = req.body;
@@ -12,7 +12,7 @@ exports.createRole = async (req, res) => {
     if (role) {
       return res.status(409).json({
         success: false,
-        message: "role already found",
+        message: "role already exists",
       });
     }
     const createdRole = await Role.create(req.body);
@@ -105,6 +105,12 @@ exports.deleteRole = async (req, res) => {
   const { id } = req.params;
   try {
     const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({
+        success: false,
+        message: "role not found",
+      });
+    }
     const deletedRole = await role.destroy();
     return res.status(200).json({
       success: true,
