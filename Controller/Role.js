@@ -29,3 +29,20 @@ exports.createRole = async (req, res) => {
     });
   }
 };
+
+exports.getAllRoles = async (req, res) => {
+  try {
+    const roles = await Role.findAll();
+    return res.status(200).json({
+      success: true,
+      message: "roles retrieved successfully",
+      data: roles,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching roles",
+    });
+  }
+};
