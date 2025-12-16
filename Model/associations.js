@@ -52,4 +52,5 @@ module.exports = {
   Category,
   Images,
   Role,
+  PostCategory,
 };

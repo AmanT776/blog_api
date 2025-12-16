@@ -1,41 +1,66 @@
-const { Post, User, Images, Category } = require("../Model/associations");
+const {
+  Post,
+  User,
+  Images,
+  Category,
+  PostCategory,
+} = require("../Model/associations");
+const db = require("../Config/db");
 const uploadToCloudinary = require("../Utils/uploadToCloudinary");
 const upload = require("../Config/multer");
 exports.createPost = async (req, res) => {
-  const Imagess = req.files;
+  const files = req.files || [];
   const { title, content, category_id } = req.body;
   const userId = req.user.id;
+
   if (!title && !content) {
     return res.status(400).json({
       success: false,
-      message: "at least one field required",
+      message: "At least title or content is required",
     });
   }
+
+  const transaction = await db.transaction();
+
   try {
     const urls = await Promise.all(
-      Imagess.map((Images) => {
-        return uploadToCloudinary(Images.buffer);
-      })
+      files.map((file) => uploadToCloudinary(file.buffer))
     );
-    const createdPost = await Post.create({
-      title: title,
-      content: content,
-      likes: 0,
-      user_id: userId,
-      category_id: category_id,
-    });
-    const createdImagess = await Promise.all(
-      urls.map((url) => {
-        return Images.create({
-          img_url: url,
-          post_id: createdPost.id,
-        });
-      })
-    );
-    const post = await Post.findOne({
-      where: {
-        id: createdPost.id,
+
+    const createdPost = await Post.create(
+      {
+        title,
+        content,
+        likes: 0,
+        user_id: userId,
       },
+      { transaction }
+    );
+
+    await PostCategory.create(
+      {
+        post_id: createdPost.id,
+        category_id,
+      },
+      { transaction }
+    );
+
+    await Promise.all(
+      urls.map((url) =>
+        Images.create(
+          {
+            img_url: url,
+            post_id: createdPost.id,
+          },
+          { transaction }
+        )
+      )
+    );
+
+    await transaction.commit();
+
+    const post = await Post.findOne({
+      where: { id: createdPost.id },
       include: [
         {
           model: Images,
@@ -44,18 +69,20 @@ exports.createPost = async (req, res) => {
         {
           model: Category,
           attributes: ["category_name"],
+          through: { attributes: [] },
         },
       ],
-      nest: true,
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: "post created successfully",
+      message: "Post created successfully",
       data: post,
     });
   } catch (err) {
-    console.log(err.message);
+    await transaction.rollback();
+    console.error(err);
+
     return res.status(500).json({
       success: false,
       message: "Internal server error while creating post",
