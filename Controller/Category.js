@@ -54,3 +54,27 @@ exports.getAllCategories = async (req, res) => {
     });
   }
 };
+
+exports.getCategoryById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const category = await Category.findByPk(id);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Category fetched successfully",
+      data: category,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching category",
+    });
+  }
+};
