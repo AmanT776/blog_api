@@ -4,8 +4,7 @@ const {
   generateRefreshToken,
 } = require("../Utils/generateTokens");
 
-const Role = require("../Model/associations");
-const User = require("../Model/associations");
+const { Role, User } = require("../Model/associations");
 
 exports.signup = async (req, res) => {
   const { first_name, last_name, email, password, role_id } = req.body;
