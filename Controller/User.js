@@ -1,5 +1,4 @@
-const User = require("../Model/User");
-const Role = require("../Model/Role");
+const { User, Role } = require("../Model/associations");
 const bcrypt = require("bcrypt");
 exports.createUser = async (req, res) => {
   const { first_name, last_name, email, password, role_id } = req.body;
@@ -22,20 +21,38 @@ exports.createUser = async (req, res) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const newUser = await User.create({
+    const createdUser = await User.create({
       first_name: first_name,
       last_name: last_name,
       email: email,
       password: hashedPassword,
       role_id: role_id,
     });
+    const newUser = await User.findByPk(createdUser.id, {
+      attributes: {
+        exclude: ["password"],
+      },
+      include: {
+        model: Role,
+        attributes: ["role_name"],
+      },
+      raw: true,
+      nest: true,
+    });
+    const { Role: userRole, ...newUserWithoutRole } = newUser;
     return res.status(200).json({
       success: true,
       message: "User created successfully",
-      data: newUser,
+      data: {
+        ...newUserWithoutRole,
+        role: userRole?.role_name,
+      },
     });
   } catch (err) {
-    return res.status(500).json(err);
+    console.log(err.message);
+    return res.status(500).json({
+      message: "Internal server error occured while creating user",
+    });
   }
 };
 
@@ -69,7 +86,7 @@ exports.getAllUsers = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "An internal server error occured while fetching users",
+      message: "An internal server error occured while retrieving users",
     });
     console.error(err);
   }
@@ -162,7 +179,6 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User deleted successfuly",
-      data: deletedUser,
     });
   } catch (err) {
     console.error(err);
